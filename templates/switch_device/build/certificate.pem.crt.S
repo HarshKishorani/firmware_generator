@@ -1,4 +1,4 @@
-/* * Data converted from F:/Firmware/code_generator/template/switch_device/main/certs/certificate.pem.crt
+/* * Data converted from F:/Firmware/code_generator/templates/switch_device/main/certs/certificate.pem.crt
  * (null byte appended)
  */
 .data

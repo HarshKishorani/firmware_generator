@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "wifi.c"
+#include "wifi.h"
 #include "esp_spiffs.h"
 #include "esp_log.h"
 #include "cJSON.h"
@@ -10,6 +10,8 @@
 #include "aws_iot_mqtt_client_interface.h"
 #include <string.h>
 
+#include <node.h>
+using namespace std;
 //* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Global Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 const char *TAG = "MAIN";
@@ -19,6 +21,9 @@ char HostAddress[255] = AWS_IOT_MQTT_HOST;
 uint32_t port = AWS_IOT_MQTT_PORT;
 
 char *thing_name;
+string switchType;
+
+switch_device_config device_config;
 
 //* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Certificates ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -315,6 +320,8 @@ void get_env_data()
                 thing_name = (char *)malloc(strlen(name->valuestring));
                 strcpy(thing_name, name->valuestring);
                 printf("Name: %s\n", name->valuestring);
+
+                device_config.name = name->valuestring;
             }
 
             cJSON *model = cJSON_GetObjectItem(json, "model");
@@ -326,22 +333,43 @@ void get_env_data()
             cJSON *switch_type = cJSON_GetObjectItem(json, "switch_type");
             if (switch_type->valuestring != NULL)
             {
+                switchType = switch_type->valuestring;
                 printf("Switch Type: %s\n", switch_type->valuestring);
             }
 
             cJSON *node_size = cJSON_GetObjectItem(json, "node_size");
-            printf("Node Size : %d\n", node_size->valueint);
+            device_config.size = node_size->valueint;
 
-            cJSON *pins = cJSON_GetObjectItem(json, "pins");
-            printf("Pins : | ");
-            for (int i = 0; i < cJSON_GetArraySize(pins); i++)
+            cJSON *relays = cJSON_GetObjectItem(json, "relays");
+            for (int i = 0; i < cJSON_GetArraySize(relays); i++)
             {
-                cJSON *subitem = cJSON_GetArrayItem(pins, i);
-                printf("%d | ", subitem->valueint);
+                cJSON *subitem = cJSON_GetArrayItem(relays, i);
+                gpio_num_t pin = (gpio_num_t)subitem->valueint;
+                device_config.relays.push_back(pin);
             }
 
+            cJSON *switches = cJSON_GetObjectItem(json, "switches");
+            for (int i = 0; i < cJSON_GetArraySize(switches); i++)
+            {
+                cJSON *subitem = cJSON_GetArrayItem(switches, i);
+                gpio_num_t pin = (gpio_num_t)subitem->valueint;
+                device_config.switches.push_back(pin);
+            }
+
+            cJSON *fan_relays = cJSON_GetObjectItem(json, "fan_relays");
+            for (int i = 0; i < cJSON_GetArraySize(fan_relays); i++)
+            {
+                cJSON *subitem = cJSON_GetArrayItem(fan_relays, i);
+                gpio_num_t pin = (gpio_num_t)subitem->valueint;
+                device_config.fan_relays.push_back(pin);
+            }
+
+            cJSON *fan_switch = cJSON_GetObjectItem(json, "fan_switch");
+            gpio_num_t pin = (gpio_num_t)fan_switch->valueint;
+            device_config.fan_switch = pin;
+
             cJSON *fan = cJSON_GetObjectItem(json, "fan");
-            printf("\nIs Fan : %d\n", fan->valueint);
+            device_config.fan = fan->valueint;
 
             cJSON_Delete(json);
         }
@@ -350,7 +378,7 @@ void get_env_data()
 
 //* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ APP MAIN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void app_main(void)
+extern "C" void app_main(void)
 {
     // Initialize NVS.
     esp_err_t err = nvs_flash_init();
@@ -364,8 +392,49 @@ void app_main(void)
     // Get env values
 
     get_env_data();
+    Node nodes = Node(device_config);
 
+    if (switchType == "RETRO")
+    {
+        ESP_LOGE(TAG, "Using Retro Switches.......................");
+        while (1)
+        {
+            if (gpio_get_level(nodes.config.fan_switch) != nodes.fanSwitchState)
+            {
+                nodes.updateFanState(gpio_get_level(nodes.config.fan_switch));
+            }
+            for (int i = 1; i <= nodes.config.size; i++)
+            {
+                if (gpio_get_level(nodes.getSwitchGPIO(i)) != nodes.getDeviceState(i))
+                {
+                    nodes.updateDeviceState(i, 0, gpio_get_level(nodes.getSwitchGPIO(i)));
+                }
+                vTaskDelay(1000 / portTICK_PERIOD_MS);
+            }
+        }
+    }
+    else
+    {
+        ESP_LOGE(TAG, "Using Touch Switches.......................");
+        while (1)
+        {
+            for (int i = 1; i <= nodes.config.size; i++)
+            {
+                if (gpio_get_level(nodes.getSwitchGPIO(i)))
+                {
+                    nodes.updateDeviceState(i, 1);
+                    while (gpio_get_level(nodes.getSwitchGPIO(i)))
+                    {
+                        ESP_LOGE(TAG, "Switch %d : %d", i, gpio_get_level(nodes.getSwitchGPIO(i)));
+                    }
+                }
+            }
+            vTaskDelay(500 / portTICK_PERIOD_MS);
+        }
+    }
+
+    // TODO: AWS IOT TASK
     // Initialize Wifi and then run device
-    initialise_wifi();
-    xTaskCreatePinnedToCore(&aws_iot_task, "aws_iot_task", 9216, NULL, 5, NULL, 1);
+    // initialise_wifi();
+    // xTaskCreatePinnedToCore(&aws_iot_task, "aws_iot_task", 9216, NULL, 5, NULL, 1);
 }

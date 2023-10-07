@@ -1,4 +1,4 @@
-/* * Data converted from F:/Firmware/code_generator/template/switch_device/main/certs/aws-root-ca.pem
+/* * Data converted from F:/Firmware/code_generator/templates/switch_device/main/certs/aws-root-ca.pem
  * (null byte appended)
  */
 .data

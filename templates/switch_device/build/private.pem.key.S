@@ -1,4 +1,4 @@
-/* * Data converted from F:/Firmware/code_generator/template/switch_device/main/certs/private.pem.key
+/* * Data converted from F:/Firmware/code_generator/templates/switch_device/main/certs/private.pem.key
  * (null byte appended)
  */
 .data

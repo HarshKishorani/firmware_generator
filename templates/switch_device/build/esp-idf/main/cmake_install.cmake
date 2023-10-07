@@ -1,4 +1,4 @@
-# Install script for directory: F:/Firmware/code_generator/template/switch_device/main
+# Install script for directory: F:/Firmware/code_generator/templates/switch_device/main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

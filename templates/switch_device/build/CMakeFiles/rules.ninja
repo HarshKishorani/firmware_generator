@@ -1381,13 +1381,13 @@ rule ASM_COMPILER____idf_main_
 
 
 #############################################
-# Rule for compiling C files.
+# Rule for compiling CXX files.
 
-rule C_COMPILER____idf_main_
+rule CXX_COMPILER____idf_main_
   depfile = $DEP_FILE
   deps = gcc
-  command = E:\esp\tools\tools\xtensa-esp32-elf\esp-2022r1-11.2.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-gcc.exe $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
-  description = Building C object $out
+  command = E:\esp\tools\tools\xtensa-esp32-elf\esp-2022r1-11.2.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-g++.exe $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  description = Building CXX object $out
 
 
 #############################################
@@ -1403,7 +1403,7 @@ rule C_STATIC_LIBRARY_LINKER____idf_main_
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = E:\esp\tools\tools\cmake\3.24.0\bin\cmake.exe --regenerate-during-build -SF:\Firmware\code_generator\template\switch_device -BF:\Firmware\code_generator\template\switch_device\build
+  command = E:\esp\tools\tools\cmake\3.24.0\bin\cmake.exe --regenerate-during-build -SF:\Firmware\code_generator\templates\switch_device -BF:\Firmware\code_generator\templates\switch_device\build
   description = Re-running CMake...
   generator = 1
 

@@ -1,4 +1,4 @@
-/* * Data converted from F:/Firmware/code_generator/template/switch_device/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from F:/Firmware/code_generator/templates/switch_device/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 .section .rodata.embedded
