@@ -3,7 +3,7 @@
     "model": "esp32",
     "switch_type": "RETRO",
     "node_size": 4,
-    "fan": true,
+    "fan": false,
     "relays": [
         16,
         17,

@@ -21,7 +21,8 @@
         "esp_event.h": "c",
         "stdio.h": "c",
         "gpio.h": "c",
-        "random": "c"
+        "random": "c",
+        "utility": "cpp"
     },
     "idf.flashType": "UART"
 }
