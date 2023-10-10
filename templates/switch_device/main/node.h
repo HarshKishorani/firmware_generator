@@ -26,6 +26,7 @@ class Node
 {
 private:
     const char *TAG = "NODE";
+    AWS_IoT_Client *client;
     bool fanAdded = false;
     pair<bool, bool> activeState{0, 1};
     bool SwitchState[6] = {true, true, true, true, true, true};
@@ -42,16 +43,6 @@ public:
     {
         if (this->config.size <= 4)
         {
-            // TODO : Add Fan to cloud
-            // fan_switch = esp_rmaker_param_create("fan_switch", NULL, esp_rmaker_bool(0), PROP_FLAG_READ | PROP_FLAG_WRITE | PROP_FLAG_PERSIST);
-            // esp_rmaker_param_add_ui_type(fan_switch, ESP_RMAKER_UI_TOGGLE);
-            // esp_rmaker_device_add_param(this->device, fan_switch);
-
-            // fan = esp_rmaker_param_create("Fan", NULL, esp_rmaker_int(1), PROP_FLAG_READ | PROP_FLAG_WRITE | PROP_FLAG_PERSIST);
-            // esp_rmaker_param_add_ui_type(fan, ESP_RMAKER_UI_SLIDER);
-            // esp_rmaker_param_add_bounds(fan, esp_rmaker_int(1), esp_rmaker_int(4), esp_rmaker_int(1));
-            // esp_rmaker_device_add_param(this->device, fan);
-
             for (gpio_num_t relay : config.fan_relays)
             {
                 gpio_set_direction(relay, GPIO_MODE_OUTPUT);
@@ -85,7 +76,7 @@ public:
             }
             fanSwitchState = state;
             fanCloudState = !state;
-            // esp_rmaker_param_update_and_notify(fan_switch, esp_rmaker_bool(!state));
+            aws_publish_bool(client, "fan_switch", !state);
         }
         else
         {
@@ -192,21 +183,28 @@ public:
             SwitchState[switchNumber - 1] = !SwitchState[switchNumber - 1];
             ESP_LOGI(TAG, "Switch %d updated to %d.", switchNumber, !SwitchState[switchNumber - 1]);
             set_switch_function(config.relays[switchNumber - 1], SwitchState[switchNumber - 1]);
-            // esp_rmaker_param_update_and_notify(parameters[switchNumber - 1], esp_rmaker_bool(SwitchState[switchNumber - 1]));
+            char *switch_name = (char *)malloc(100);
+            sprintf(switch_name, "Switch_%d", switchNumber);
+            aws_publish_bool(client, switch_name, SwitchState[switchNumber - 1]);
+            free(switch_name);
         }
         else
         {
             SwitchState[switchNumber - 1] = state;
             ESP_LOGI(TAG, "Switch %d updated to %d.", switchNumber, !SwitchState[switchNumber - 1]);
             set_switch_function(config.relays[switchNumber - 1], SwitchState[switchNumber - 1]);
-            // esp_rmaker_param_update_and_notify(parameters[switchNumber - 1], esp_rmaker_bool(!SwitchState[switchNumber - 1]));
+            char *switch_name = (char *)malloc(100);
+            sprintf(switch_name, "Switch_%d", switchNumber);
+            aws_publish_bool(client, switch_name, SwitchState[switchNumber - 1]);
+            free(switch_name);
         }
     }
 
     //* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Constructor ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Node() {}
-    Node(switch_device_config config)
+    Node(AWS_IoT_Client *pClient, switch_device_config config)
     {
+        this->client = pClient;
         this->config = config;
         if (config.size > 6)
         {
@@ -233,31 +231,5 @@ public:
         {
             addFan();
         }
-
-        // TODO: Cloud Functions
-        // ESP_LOGE(TAG, "Name : %s", config.name);
-        /*ESP_LOGE(TAG, "Size : %d", config.size);
-        ESP_LOGE(TAG, "Fan : %s", config.fan ? "True" : "False");
-        ESP_LOGE(TAG, "Active : %s", config.active ? "High" : "Low");
-
-        ESP_LOGI(TAG, "Relay GPIOs : ");
-        for (gpio_num_t relay_gpio : config.relays)
-        {
-            ESP_LOGE(TAG, "GPIO_NUM_%d", relay_gpio);
-        }
-
-        ESP_LOGI(TAG, "Switch GPIOs : ");
-        for (gpio_num_t switch_gpio : config.switches)
-        {
-            ESP_LOGE(TAG, "GPIO_NUM_%d", switch_gpio);
-        }
-
-        ESP_LOGI(TAG, "Fan Relay GPIOs : ");
-        for (gpio_num_t fan_relay_gpio : config.fan_relays)
-        {
-            ESP_LOGE(TAG, "GPIO_NUM_%d", fan_relay_gpio);
-        }
-
-        ESP_LOGE(TAG, "Fan Switch GPIO: GPIO_NUM_%d", config.fan_switch);*/
     }
 };

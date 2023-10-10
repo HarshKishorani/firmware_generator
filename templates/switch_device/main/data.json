@@ -10,7 +10,16 @@
         18,
         19
     ],
-    "switches" : [13,27,26,25],
-    "fan_relays" : [21,22,23],
-    "fan_switch" : 33
+    "switches": [
+        13,
+        27,
+        26,
+        25
+    ],
+    "fan_relays": [
+        21,
+        22,
+        23
+    ],
+    "fan_switch": 33
 }

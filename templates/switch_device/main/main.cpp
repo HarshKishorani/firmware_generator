@@ -12,6 +12,7 @@ using namespace std;
 const char *TAG = "MAIN";
 const char *AWS_TAG = "AWS IOT";
 
+AWS_IoT_Client client;
 char HostAddress[255] = AWS_IOT_MQTT_HOST;
 uint32_t port = AWS_IOT_MQTT_PORT;
 
@@ -22,6 +23,8 @@ switch_device_config device_config;
 Node nodes;
 
 //* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Boot Pin Interrupt task ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// TODO: Write reset functions
 
 SemaphoreHandle_t xSemaphore = NULL;
 
@@ -216,63 +219,62 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
     {
         ESP_LOGI(AWS_TAG, "Received new Switch_1 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(1), param->valueint);
+        aws_publish_bool(&client, param->string, param->valueint);
     }
     else if (strcmp(param->string, "Switch_2") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new Switch_2 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(2), param->valueint);
-        // esp_rmaker_param_update_and_report(param->string, val);
+        aws_publish_bool(&client, param->string, param->valueint);
     }
     else if (strcmp(param->string, "Switch_3") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new Switch_3 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(3), param->valueint);
-        // esp_rmaker_param_update_and_report(param->string, val);
+        aws_publish_bool(&client, param->string, param->valueint);
     }
     else if (strcmp(param->string, "Switch_4") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new Switch_4 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(4), param->valueint);
-        // esp_rmaker_param_update_and_report(param->string, val);
+        aws_publish_bool(&client, param->string, param->valueint);
     }
     else if (strcmp(param->string, "Switch_5") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new Switch_5 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(5), param->valueint);
-        // esp_rmaker_param_update_and_report(param->string, val);
+        aws_publish_bool(&client, param->string, param->valueint);
     }
     else if (strcmp(param->string, "Switch_6") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new Switch_6 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(6), param->valueint);
-        // esp_rmaker_param_update_and_report(param->string, val);
+        aws_publish_bool(&client, param->string, param->valueint);
     }
     else if (strcmp(param->string, "Fan") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new Fan Speed Value : %d", param->valueint);
         nodes.fan_speed = param->valueint;
         nodes.set_fan(nodes.fanCloudState);
-        // esp_rmaker_param_update_and_report(param->string, val);
+        aws_publish_int(&client, param->string, param->valueint);
     }
     else if (strcmp(param->string, "fan_switch") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new Fan State Value : %d", param->valueint);
         nodes.fanCloudState = param->valueint;
         nodes.set_fan(nodes.fanCloudState);
-        // esp_rmaker_param_update_and_report(param->string, val);
+        aws_publish_bool(&client, param->string, param->valueint);
     }
     // else if (strcmp(param->string, "All") == 0)
     // {
     //     ESP_LOGI(TAG, "Received value = %s for %s - %s",
     //              val.val.b ? "true" : "false", esp_rmaker_device_get_name(device),
     //              param->string);
-    //     esp_rmaker_param_update_and_report(param->string, val);
-
-    // cJSON_Delete(param);
-    // cJSON_Delete(json);
+    //     aws_publish_bool(&client, param->string, param->valueint);
     // }
     else if (strcmp(param->string, "Reboot") == 0)
     {
+        aws_publish_bool(&client, param->string, param->valueint);
         if (param->valueint == 1)
         {
             ESP_LOGI(AWS_TAG, "Received Reboot Request.");
@@ -281,6 +283,7 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
     }
     else if (strcmp(param->string, "Wifi-Reset") == 0)
     {
+        aws_publish_bool(&client, param->string, param->valueint);
         if (param->valueint == 1)
         {
             ESP_LOGI(AWS_TAG, "Received Wifi-Reset Request.");
@@ -289,6 +292,7 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
     }
     else if (strcmp(param->string, "Factory-Reset") == 0)
     {
+        aws_publish_bool(&client, param->string, param->valueint);
         if (param->valueint == 1)
         {
             ESP_LOGI(AWS_TAG, "Received Factory-Reset Request.");
@@ -305,7 +309,6 @@ void aws_iot_task(void *param)
     xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_EVENT, false, true, portMAX_DELAY);
     IoT_Error_t rc = FAILURE;
 
-    AWS_IoT_Client client;
     IoT_Client_Init_Params mqttInitParams = iotClientInitParamsDefault;
     IoT_Client_Connect_Params connectParams = iotClientConnectParamsDefault;
 
@@ -381,11 +384,10 @@ void aws_iot_task(void *param)
     if (switchType == "RETRO")
     {
         ESP_LOGE(TAG, "Using Retro Switches.......................");
-        aws_publish_bool(&client,"Switch_1",true);
         while ((NETWORK_ATTEMPTING_RECONNECT == rc || NETWORK_RECONNECTED == rc || SUCCESS == rc))
         {
             // Max time the yield function will wait for read messages
-            rc = aws_iot_mqtt_yield(&client, 100);
+            rc = aws_iot_mqtt_yield(&client, 250);
             if (NETWORK_ATTEMPTING_RECONNECT == rc)
             {
                 // If the client is attempting to reconnect we will skip the rest of the loop.
@@ -398,7 +400,7 @@ void aws_iot_task(void *param)
             }
             for (int i = 1; i <= nodes.config.size; i++)
             {
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
+                vTaskDelay(50 / portTICK_PERIOD_MS);
                 if (gpio_get_level(nodes.getSwitchGPIO(i)) != nodes.getDeviceState(i))
                 {
                     nodes.updateDeviceState(i, 0, gpio_get_level(nodes.getSwitchGPIO(i)));
@@ -412,7 +414,7 @@ void aws_iot_task(void *param)
         while ((NETWORK_ATTEMPTING_RECONNECT == rc || NETWORK_RECONNECTED == rc || SUCCESS == rc))
         {
             // Max time the yield function will wait for read messages
-            rc = aws_iot_mqtt_yield(&client, 100);
+            rc = aws_iot_mqtt_yield(&client, 250);
             if (NETWORK_ATTEMPTING_RECONNECT == rc)
             {
                 // If the client is attempting to reconnect we will skip the rest of the loop.
@@ -430,7 +432,7 @@ void aws_iot_task(void *param)
                     }
                 }
             }
-            vTaskDelay(500 / portTICK_PERIOD_MS);
+            vTaskDelay(200 / portTICK_PERIOD_MS);
         }
     }
     ESP_LOGE(AWS_TAG, "An error occurred in the main loop.");
@@ -452,9 +454,10 @@ extern "C" void app_main(void)
 
     // Get env values and initialize nodes
     get_env_data();
-    nodes = Node(device_config);
+    nodes = Node(&client, device_config);
+    // TODO: Get and update values from cloud
 
-    //Factory & Wifi Reset using Boot Pin
+    // Factory & Wifi Reset using Boot Pin
     esp_rom_gpio_pad_select_gpio(BOOT_PIN);
     gpio_set_direction(BOOT_PIN, GPIO_MODE_INPUT);
     gpio_pulldown_en(BOOT_PIN);
