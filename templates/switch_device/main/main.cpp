@@ -1,8 +1,9 @@
 #include <stdio.h>
-#include "wifi.h"
+#include "include/app_wifi.h"
 #include "cJSON.h"
-#include <node.h>
+#include "include/node.h"
 #include "esp_timer.h"
+#include "include/utils.h"
 using namespace std;
 
 //* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Global Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,12 +55,12 @@ void BOOT_Button_Task(void *arg)
             if ((end_timer - begin_timer) / 1000000 >= 10)
             {
                 ESP_LOGE(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ FACTORY RESETTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                // esp_rmaker_factory_reset(2, 2);
+                app_factory_reset(0, 0);
             }
             else if ((end_timer - begin_timer) / 1000000 >= 3)
             {
                 ESP_LOGE(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RESETTING WIFI ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                // esp_rmaker_wifi_reset(2, 2);
+                app_wifi_reset(0, 0);
             }
             else if ((end_timer - begin_timer) / 1000000 >= 1)
             {
@@ -268,7 +269,7 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
     // else if (strcmp(param->string, "All") == 0)
     // {
     //     ESP_LOGI(TAG, "Received value = %s for %s - %s",
-    //              val.val.b ? "true" : "false", esp_rmaker_device_get_name(device),
+    //              val.val.b ? "true" : "false", app_device_get_name(device),
     //              param->string);
     //     aws_publish_bool(&client, param->string, param->valueint);
     // }
@@ -278,7 +279,7 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
         if (param->valueint == 1)
         {
             ESP_LOGI(AWS_TAG, "Received Reboot Request.");
-            // esp_rmaker_reboot(2);
+            app_reboot(2);
         }
     }
     else if (strcmp(param->string, "Wifi-Reset") == 0)
@@ -287,7 +288,7 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
         if (param->valueint == 1)
         {
             ESP_LOGI(AWS_TAG, "Received Wifi-Reset Request.");
-            // esp_rmaker_wifi_reset(2, 2);
+            app_wifi_reset(2, 5);
         }
     }
     else if (strcmp(param->string, "Factory-Reset") == 0)
@@ -296,7 +297,7 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
         if (param->valueint == 1)
         {
             ESP_LOGI(AWS_TAG, "Received Factory-Reset Request.");
-            // esp_rmaker_factory_reset(2, 2);
+            app_factory_reset(2, 2);
         }
     }
     cJSON_Delete(json);

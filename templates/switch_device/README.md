@@ -53,5 +53,5 @@ To generate firmware for your product perform the following steps :
 - [ ] Function to get Subscribe and Publish topics.
 - [x] Cloud to Device Updates (Subscribe to updates from cloud).
 - [x] Device to Cloud Updates (Publish updates from cloud).
-- [ ] Factory Reset, Wifi Reset and Reboot Device functions.
+- [x] Factory Reset, Wifi Reset and Reboot Device functions.
 - [ ] Function to get all values from cloud once device boots / starts. 
