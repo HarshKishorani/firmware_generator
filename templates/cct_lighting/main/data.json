@@ -1,0 +1,6 @@
+{
+    "name": "MyESP32",
+    "model": "esp32",
+    "brightness_gpio": 18,
+    "temprature_gpio": 19
+}

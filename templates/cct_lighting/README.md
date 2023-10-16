@@ -1,4 +1,4 @@
-# Switch Device Firmware
+# CCT lighting Firmware
 
 To generate firmware for your product perform the following steps :
 
@@ -16,7 +16,7 @@ To generate firmware for your product perform the following steps :
   2. Eg. of change update
     ```
     {
-        "Switch_1" : true
+        "Brightness" : 60
     }
   ```
   3. The change update will then be routed to our Backend Server from AWS Iot Core; and then updates will be updated in our Database.
@@ -34,14 +34,13 @@ To generate firmware for your product perform the following steps :
 <tr>
 <td style="border-right: 1px solid #000; padding-right: 10px;">
 <pre><code>{
-    "Switch_1" : true   
+    "Brightness" : 60   
 }</code></pre>
 </td>
 <td style="padding-left: 10px;">
 <pre><code>{
-    "Switch_1" : true,
-    "Switch_2" : true,
-    "Switch_3" : false      
+    "Brightness" : 60,
+    "Temprature" : 200,      
 }</code></pre>
             </td>
         </tr>
@@ -55,4 +54,4 @@ To generate firmware for your product perform the following steps :
 - [x] Device to Cloud Updates (Publish updates from cloud).
 - [x] Factory Reset, Wifi Reset and Reboot Device functions.
 - [ ] Function to get all values from cloud once device boots / starts. 
-- [ ] Update online status to cloud on system boot and device power off.
+- [ ] Update online status to cloud on system boot and system power off.
