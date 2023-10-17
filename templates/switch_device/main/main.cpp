@@ -216,43 +216,43 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
     cJSON *param = json->child;
 
     //* Change Values based on params
-    if (strcmp(param->string, "Switch_1") == 0)
+    if (strcmp(param->string, "switch_1") == 0)
     {
-        ESP_LOGI(AWS_TAG, "Received new Switch_1 Value : %d", param->valueint);
+        ESP_LOGI(AWS_TAG, "Received new switch_1 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(1), param->valueint);
         aws_publish_bool(&client, param->string, param->valueint);
     }
-    else if (strcmp(param->string, "Switch_2") == 0)
+    else if (strcmp(param->string, "switch_2") == 0)
     {
-        ESP_LOGI(AWS_TAG, "Received new Switch_2 Value : %d", param->valueint);
+        ESP_LOGI(AWS_TAG, "Received new switch_2 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(2), param->valueint);
         aws_publish_bool(&client, param->string, param->valueint);
     }
-    else if (strcmp(param->string, "Switch_3") == 0)
+    else if (strcmp(param->string, "switch_3") == 0)
     {
-        ESP_LOGI(AWS_TAG, "Received new Switch_3 Value : %d", param->valueint);
+        ESP_LOGI(AWS_TAG, "Received new switch_3 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(3), param->valueint);
         aws_publish_bool(&client, param->string, param->valueint);
     }
-    else if (strcmp(param->string, "Switch_4") == 0)
+    else if (strcmp(param->string, "switch_4") == 0)
     {
-        ESP_LOGI(AWS_TAG, "Received new Switch_4 Value : %d", param->valueint);
+        ESP_LOGI(AWS_TAG, "Received new switch_4 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(4), param->valueint);
         aws_publish_bool(&client, param->string, param->valueint);
     }
-    else if (strcmp(param->string, "Switch_5") == 0)
+    else if (strcmp(param->string, "switch_5") == 0)
     {
-        ESP_LOGI(AWS_TAG, "Received new Switch_5 Value : %d", param->valueint);
+        ESP_LOGI(AWS_TAG, "Received new switch_5 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(5), param->valueint);
         aws_publish_bool(&client, param->string, param->valueint);
     }
-    else if (strcmp(param->string, "Switch_6") == 0)
+    else if (strcmp(param->string, "switch_6") == 0)
     {
-        ESP_LOGI(AWS_TAG, "Received new Switch_6 Value : %d", param->valueint);
+        ESP_LOGI(AWS_TAG, "Received new switch_6 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(6), param->valueint);
         aws_publish_bool(&client, param->string, param->valueint);
     }
-    else if (strcmp(param->string, "Fan") == 0)
+    else if (strcmp(param->string, "fan_speed") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new Fan Speed Value : %d", param->valueint);
         nodes.fan_speed = param->valueint;
@@ -273,7 +273,7 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
     //              param->string);
     //     aws_publish_bool(&client, param->string, param->valueint);
     // }
-    else if (strcmp(param->string, "Reboot") == 0)
+    else if (strcmp(param->string, "reboot") == 0)
     {
         aws_publish_bool(&client, param->string, param->valueint);
         if (param->valueint == 1)
@@ -282,7 +282,7 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
             app_reboot(2);
         }
     }
-    else if (strcmp(param->string, "Wifi-Reset") == 0)
+    else if (strcmp(param->string, "wifi_reset") == 0)
     {
         aws_publish_bool(&client, param->string, param->valueint);
         if (param->valueint == 1)
@@ -291,7 +291,7 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
             app_wifi_reset(2, 5);
         }
     }
-    else if (strcmp(param->string, "Factory-Reset") == 0)
+    else if (strcmp(param->string, "factory_reset") == 0)
     {
         aws_publish_bool(&client, param->string, param->valueint);
         if (param->valueint == 1)

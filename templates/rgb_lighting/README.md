@@ -1,4 +1,4 @@
-# CCT lighting Firmware
+# RGB lighting Firmware
 
 To generate firmware for your product perform the following steps :
 
@@ -12,8 +12,9 @@ To generate firmware for your product perform the following steps :
 | Parameter Name | Data Type | Range |
 | --------------- | --------------- | --------------- |
 | power | bool | - |
-| brightness | int | 1-100 |
-| temprature | int | - |
+| colors_text | string | - |
+| mode | int | 1-3 |
+| speed | int | 1-100 |
 | reboot | bool | - |
 | wifi_reset | bool | - |
 | factory_reset | bool | - |
@@ -26,7 +27,7 @@ To generate firmware for your product perform the following steps :
   2. Eg. of change update
     ```
     {
-        "brightness" : 60
+        "mode" : 3
     }
   ```
   3. The change update will then be routed to our Backend Server from AWS Iot Core; and then updates will be updated in our Database.
@@ -44,13 +45,13 @@ To generate firmware for your product perform the following steps :
 <tr>
 <td style="border-right: 1px solid #000; padding-right: 10px;">
 <pre><code>{
-    "brightness" : 60   
+    "mode" : 3   
 }</code></pre>
 </td>
 <td style="padding-left: 10px;">
 <pre><code>{
-    "brightness" : 60,
-    "temprature" : 200,      
+    "mode" : 3
+    "colors_text" : "FF000000FF000000FF",      
 }</code></pre>
             </td>
         </tr>

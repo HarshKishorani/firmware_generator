@@ -1,0 +1,7 @@
+{
+    "name": "MyESP32",
+    "model": "esp32",
+    "led_red_gpio": 16,
+    "led_green_gpio": 17,
+    "led_blue_gpio" : 18
+}

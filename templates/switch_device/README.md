@@ -8,6 +8,21 @@ To generate firmware for your product perform the following steps :
 4. Get developer's product configration using the ***token*** provided and edit the `main\data.json` file with developer's product configration.
 5. Now you have successfully created a new firmware for developer's device with **device_id = unique thing name you gave on AWS Iot** for developer's product with unique product_id.
 
+## Parametes
+| Parameter Name | Data Type | Range |
+| --------------- | --------------- | --------------- |
+| switch_1 | bool | - |
+| switch_2 | bool | - |
+| switch_3 | bool | - |
+| switch_4 | bool | - |
+| switch_5 | bool | - |
+| switch_6 | bool | - |
+| fan_switch | bool | - |
+| fan_speed | int | 1-4 |
+| reboot | bool | - |
+| wifi_reset | bool | - |
+| factory_reset | bool | - |
+
 ## Working of Cloud
 
 - #### Device to Cloud updates
@@ -16,7 +31,7 @@ To generate firmware for your product perform the following steps :
   2. Eg. of change update
     ```
     {
-        "Switch_1" : true
+        "switch_1" : true
     }
   ```
   3. The change update will then be routed to our Backend Server from AWS Iot Core; and then updates will be updated in our Database.
@@ -34,14 +49,14 @@ To generate firmware for your product perform the following steps :
 <tr>
 <td style="border-right: 1px solid #000; padding-right: 10px;">
 <pre><code>{
-    "Switch_1" : true   
+    "switch_1" : true   
 }</code></pre>
 </td>
 <td style="padding-left: 10px;">
 <pre><code>{
-    "Switch_1" : true,
-    "Switch_2" : true,
-    "Switch_3" : false      
+    "switch_1" : true,
+    "switch_2" : true,
+    "switch_3" : false      
 }</code></pre>
             </td>
         </tr>
@@ -56,3 +71,5 @@ To generate firmware for your product perform the following steps :
 - [x] Factory Reset, Wifi Reset and Reboot Device functions.
 - [ ] Function to get all values from cloud once device boots / starts. 
 - [ ] Update online status to cloud on system boot and device power off.
+- [ ] Add resetting flag in endless while loop (Check rgb_esp_idf repo).
+- [ ] Wifi App event Handler.

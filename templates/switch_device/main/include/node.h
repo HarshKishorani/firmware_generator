@@ -184,7 +184,7 @@ public:
             ESP_LOGI(TAG, "Switch %d updated to %d.", switchNumber, !SwitchState[switchNumber - 1]);
             set_switch_function(config.relays[switchNumber - 1], SwitchState[switchNumber - 1]);
             char *switch_name = (char *)malloc(100);
-            sprintf(switch_name, "Switch_%d", switchNumber);
+            sprintf(switch_name, "switch_%d", switchNumber);
             aws_publish_bool(client, switch_name, SwitchState[switchNumber - 1]);
             free(switch_name);
         }
@@ -194,7 +194,7 @@ public:
             ESP_LOGI(TAG, "Switch %d updated to %d.", switchNumber, !SwitchState[switchNumber - 1]);
             set_switch_function(config.relays[switchNumber - 1], SwitchState[switchNumber - 1]);
             char *switch_name = (char *)malloc(100);
-            sprintf(switch_name, "Switch_%d", switchNumber);
+            sprintf(switch_name, "switch_%d", switchNumber);
             aws_publish_bool(client, switch_name, SwitchState[switchNumber - 1]);
             free(switch_name);
         }

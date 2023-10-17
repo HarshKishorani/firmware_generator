@@ -128,13 +128,17 @@ void get_env_data()
                 printf("Model: %s\n", model->valuestring);
             }
 
-            cJSON *brightness_gpio = cJSON_GetObjectItem(json, "brightness_gpio");
-            gpio_num_t pin = (gpio_num_t)brightness_gpio->valueint;
-            device_config.brightness_gpio = pin;
+            cJSON *led_red_gpio = cJSON_GetObjectItem(json, "led_red_gpio");
+            gpio_num_t pin = (gpio_num_t)led_red_gpio->valueint;
+            device_config.led_red_gpio = pin;
 
-            cJSON *temprature_gpio = cJSON_GetObjectItem(json, "temprature_gpio");
-            pin = (gpio_num_t)temprature_gpio->valueint;
-            device_config.color_temp_gpio = pin;
+            cJSON *led_green_gpio = cJSON_GetObjectItem(json, "led_green_gpio");
+            pin = (gpio_num_t)led_green_gpio->valueint;
+            device_config.led_green_gpio = pin;
+
+            cJSON *led_blue_gpio = cJSON_GetObjectItem(json, "led_blue_gpio");
+            pin = (gpio_num_t)led_blue_gpio->valueint;
+            device_config.led_blue_gpio = pin;
 
             cJSON_Delete(json);
         }
@@ -182,22 +186,31 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
     cJSON *param = json->child;
 
     //* Change Values based on params
-    if (strcmp(param->string, "power") == 0)
+    if (strcmp(param->string, "colors_text") == 0)
     {
-        ESP_LOGI(AWS_TAG, "Updated status : %d", param->valueint);
-        lights.updateStatus(param->valueint);
+        ESP_LOGI(TAG, "Received new Color Value : %s", param->valuestring);
+        string colors = param->valuestring;
+        lights.update(colors);
+        aws_publish_string(&client, param->string, param->valuestring);
+    }
+    else if (strcmp(param->string, "power") == 0)
+    {
+        ESP_LOGI(TAG, "Received power Value : %d", param->valueint);
+        lights.setState(param->valueint);
         aws_publish_bool(&client, param->string, param->valueint);
     }
-    else if (strcmp(param->string, "brightness") == 0)
+    else if (strcmp(param->string, "mode") == 0)
     {
-        ESP_LOGI(AWS_TAG, "Received new Brightness value : %d", param->valueint);
-        lights.updateBrightness(param->valueint);
+        ESP_LOGI(TAG, "Received mode Value : %d", param->valueint);
+        int mode = param->valueint;
+        lights.updateMode(mode);
         aws_publish_bool(&client, param->string, param->valueint);
     }
-    else if (strcmp(param->string, "temprature") == 0)
+    else if (strcmp(param->string, "speed") == 0)
     {
-        ESP_LOGI(AWS_TAG, "Received new temprature value : %d", param->valueint);
-        lights.updateColorTemp(param->valueint);
+        ESP_LOGI(TAG, "Received Speed Value : %d", param->valueint);
+        int speed = param->valueint;
+        lights.updateSpeed(speed);
         aws_publish_bool(&client, param->string, param->valueint);
     }
     else if (strcmp(param->string, "reboot") == 0)
@@ -318,6 +331,10 @@ void aws_iot_task(void *param)
             // If the client is attempting to reconnect we will skip the rest of the loop.
             continue;
         }
+        // if (resetting)
+        // {
+        //     break;
+        // }
         lights.run();
     }
     ESP_LOGE(AWS_TAG, "An error occurred in the main loop.");
@@ -339,7 +356,8 @@ extern "C" void app_main(void)
 
     // Get env values and initialize Lights
     get_env_data();
-    lights = Lighting(&client, device_config);
+    lights = Lighting(&client, device_config,"FFFFFF");
+    lights.init();
     // TODO: Get and update values from cloud
 
     // Factory & Wifi Reset using Boot Pin
