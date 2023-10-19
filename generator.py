@@ -5,15 +5,25 @@ import os
 import requests
 import datetime
 import boto3
+import shutil
 
 
-
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 def get_topic_name(device_id : str):
     return f"{device_id}/pub"
 
 # https://drive.google.com/file/d/1u_9sbHuP4DCOUqqfd_0iNgwtbNCP7LVW/view?usp=drive_link
 POLICY_NAME = "esp_policy"
-def create_thing(thing_name, attr, device_name):
+def create_thing(thing_name, attr, product_name, product_id):
     attr_payload = {
         "attributes" : {}
     }
@@ -33,7 +43,14 @@ def create_thing(thing_name, attr, device_name):
     )   
         topic_name = get_topic_name(thing_name)
         client.attach_thing_principal(thingName = thing_name, principal = cert_res["certificateArn"])
-        return {"certificate" : cert_res["certificatePem"],
+
+        res = requests.post(base_path + register_device_api, data={"id" : thing_name, "name" : "none", "product" : product_id})
+        if res.status_code == 200:
+            print("Device Registered in DB")
+        else:
+            print("Unable to register device in DB")
+        return {
+            "certificate" : cert_res["certificatePem"],
             "public_key" : cert_res["keyPair"]["PublicKey"],
             "private_key" : cert_res["keyPair"]["PrivateKey"],
             "topic_name" : topic_name,
@@ -52,11 +69,11 @@ def create_thing(thing_name, attr, device_name):
 
 base_path = "http://127.0.0.1:8000/"
 get_product_via_token_endpoint = "products/get_product_from_token/"
+register_device_api = "v1/api/device_control/device/register"
 
+token = "4827c0cc-0c0a-4492-a365-a856051928b2"
 
-token = "19824966-f63a-4a6b-a94c-646bdff7ef0c"
-
-save_name = "new_templates_1.zip"
+save_name = "generated_firmware.zip"
 
 file_id = "1ur_5OzvQX0zXAbD555VJaMdOzrSr8JXn"
 
@@ -87,14 +104,18 @@ attrs = []
 for i in pinfo["attributes"]:
     attrs.append(i["attribute_name"])
 # print(pinfo)
-data = create_thing(pinfo["thingName"], attrs, device_name)
-
+# data = create_thing(pinfo["thingName"], attrs, device_name, pinfo["id"])
+print("Device id : "+bcolors.OKGREEN + pinfo["thingName"] + bcolors.ENDC)
 json_data = json.load(open(data_json_path, "r"))
 json_data["name"] = pinfo["thingName"]
 json.dump(json_data,open(data_json_path,"w"))
 
-with open(private_key_file, "w") as f:
-    f.writelines(data["private_key"])
+# with open(private_key_file, "w") as f:
+#     f.writelines(data["private_key"])
 
-with open(certificate_file, "w") as f:
-    f.writelines(data["certificate"])
+# with open(certificate_file, "w") as f:
+#     f.writelines(data["certificate"])
+
+for i in os.listdir(os.path.join(save_name[:-4], "firmware_generator-main", "templates")):
+    if i != device_name:
+        shutil.rmtree(os.path.join(save_name[:-4], "firmware_generator-main", "templates", i))
