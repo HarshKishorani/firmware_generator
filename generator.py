@@ -104,17 +104,17 @@ attrs = []
 for i in pinfo["attributes"]:
     attrs.append(i["attribute_name"])
 # print(pinfo)
-# data = create_thing(pinfo["thingName"], attrs, device_name, pinfo["id"])
+data = create_thing(pinfo["thingName"], attrs, device_name, pinfo["id"])
 print("Device id : "+bcolors.OKGREEN + pinfo["thingName"] + bcolors.ENDC)
 json_data = json.load(open(data_json_path, "r"))
 json_data["name"] = pinfo["thingName"]
 json.dump(json_data,open(data_json_path,"w"))
 
-# with open(private_key_file, "w") as f:
-#     f.writelines(data["private_key"])
+with open(private_key_file, "w") as f:
+    f.writelines(data["private_key"])
 
-# with open(certificate_file, "w") as f:
-#     f.writelines(data["certificate"])
+with open(certificate_file, "w") as f:
+    f.writelines(data["certificate"])
 
 for i in os.listdir(os.path.join(save_name[:-4], "firmware_generator-main", "templates")):
     if i != device_name:
