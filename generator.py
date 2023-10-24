@@ -71,17 +71,25 @@ base_path = "http://127.0.0.1:8000/"
 get_product_via_token_endpoint = "products/get_product_from_token/"
 register_device_api = "v1/api/device_control/device/register"
 
-token = "4827c0cc-0c0a-4492-a365-a856051928b2"
+token = "1da61c35-1d7b-4fbf-b18f-02e655dc77c3"
 
 save_name = "generated_firmware.zip"
 
 file_id = "1ur_5OzvQX0zXAbD555VJaMdOzrSr8JXn"
+
+# print(os.path.exists(r"generated_firmware\firmware_generator-main\templates\switch_device"))
 
 def download_templates_file(save_name):
     assert save_name.endswith("zip")
     gdown.download(f'https://drive.google.com/uc?id={file_id}&export=download', save_name, quiet=False)
     with ZipFile(save_name, "r") as zip:
         zip.extractall(f"{save_name[:-4]}")
+    shutil.rmtree("output", ignore_errors=True)
+    os.makedirs("output", exist_ok=True)
+    # os.path.exists(r"generated_firmware\firmware_generator-main\templates\switch_device")
+
+    shutil.copytree(r"generated_firmware\firmware_generator-main\templates\switch_device", r"output\switch_device") 
+    shutil.rmtree(r"generated_firmware")
 
 download_templates_file(save_name)
 res = requests.get(base_path + get_product_via_token_endpoint, headers={"token" : token})
@@ -93,8 +101,9 @@ if res.status_code == 400:
 pinfo = res.json()
 
 device_name = pinfo["base_product_name"]
-data_json_path = os.path.join(save_name[:-4], "firmware_generator-main", "templates", device_name,"main", "data.json")
-certs_path = os.path.join(save_name[:-4], "firmware_generator-main", "templates", device_name,"main", "certs")
+data_json_path = os.path.join("output", device_name,"main", "data.json")
+cmake_path = os.path.join("output", device_name, "CMakeLists.txt") 
+certs_path = os.path.join("output", device_name,"main", "certs")
 os.makedirs(certs_path, exist_ok=True)
 certificate_file = os.path.join(certs_path, "certificate.pem.crt")
 private_key_file = os.path.join(certs_path, "private.pem.key")
@@ -110,12 +119,18 @@ json_data = json.load(open(data_json_path, "r"))
 json_data["name"] = pinfo["thingName"]
 json.dump(json_data,open(data_json_path,"w"))
 
+with open(cmake_path ,"r") as f:
+    new = f.read()
+
+new = new.replace("switch_device", pinfo["thingName"])
+with open(cmake_path, "w") as f:
+    f.write(new)
+
+
 with open(private_key_file, "w") as f:
     f.writelines(data["private_key"])
 
 with open(certificate_file, "w") as f:
     f.writelines(data["certificate"])
 
-for i in os.listdir(os.path.join(save_name[:-4], "firmware_generator-main", "templates")):
-    if i != device_name:
-        shutil.rmtree(os.path.join(save_name[:-4], "firmware_generator-main", "templates", i))
+shutil.move("output/switch_device", f"output/{pinfo['thingName']}")
