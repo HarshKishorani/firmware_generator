@@ -21,6 +21,9 @@ class bcolors:
 def get_topic_name(device_id : str):
     return f"{device_id}/pub"
 
+ENPOINT_URL = "https://helloindia.pythonanywhere.com/devices/add_data/ingest/"
+CONFIRMATION_URL = "https://helloindia.pythonanywhere.com/devices/add_data/"
+
 # https://drive.google.com/file/d/1u_9sbHuP4DCOUqqfd_0iNgwtbNCP7LVW/view?usp=drive_link
 POLICY_NAME = "esp_policy"
 def create_thing(thing_name, attr, product_name, product_id):
@@ -40,10 +43,30 @@ def create_thing(thing_name, attr, product_name, product_id):
         attach_policy_res = client.attach_policy(
         policyName=POLICY_NAME,
         target = cert_res["certificateArn"]
-    )   
+        )   
         topic_name = get_topic_name(thing_name)
         client.attach_thing_principal(thingName = thing_name, principal = cert_res["certificateArn"])
-
+        res = client.create_topic_rule(
+                ruleName = f"rule_{thing_name}",
+                topicRulePayload = {
+                    'sql' : f"select * from '{topic_name}'",
+                    'description' : "Description of the rule",
+                    "actions" : [
+                        {
+                            'http': {
+                            'url': ENPOINT_URL,
+                            'confirmationUrl': CONFIRMATION_URL,
+                            'headers': [
+                            {
+                                'key': 'device-id',
+                                'value': str(thing_name)
+                            },
+                        ],
+                    }
+                }
+            ]
+            }
+        )
         res = requests.post(base_path + register_device_api, data={"id" : thing_name, "name" : "none", "product" : product_id})
         if res.status_code == 200:
             print("Device Registered in DB")
@@ -63,7 +86,7 @@ def create_thing(thing_name, attr, product_name, product_id):
             client.delete_thing(thingName = thing_name)
         except:
             pass
-        raise RuntimeError("Unable to craete thing successfully")
+        raise RuntimeError("Unable to create thing successfully")
         
     
 
@@ -71,13 +94,13 @@ base_path = "http://127.0.0.1:8000/"
 get_product_via_token_endpoint = "products/get_product_from_token/"
 register_device_api = "v1/api/device_control/device/register"
 
-token = "4655c930-3635-4313-b759-42d697455543"
+token = "34eb7173-7250-4eb1-b987-ac72e44b3ef9"
 
 save_name = "generated_firmware.zip"
 
 file_id = "1ur_5OzvQX0zXAbD555VJaMdOzrSr8JXn"
 
-# print(os.path.exists(r"generated_firmware\firmware_generator-main\templates\switch_device"))
+
 
 def download_templates_file(save_name):
     assert save_name.endswith("zip")
@@ -86,9 +109,8 @@ def download_templates_file(save_name):
         zip.extractall(f"{save_name[:-4]}")
     shutil.rmtree("output", ignore_errors=True)
     os.makedirs("output", exist_ok=True)
-    # os.path.exists(r"generated_firmware\firmware_generator-main\templates\switch_device")
 
-    shutil.copytree(r"generated_firmware\firmware_generator-main\templates\switch_device", r"output\switch_device") 
+    shutil.copytree(r"generated_firmware\firmware_generator-main\templates", "output\\", dirs_exist_ok=True) 
     shutil.rmtree(r"generated_firmware")
 
 download_templates_file(save_name)
@@ -122,7 +144,7 @@ json.dump(json_data,open(data_json_path,"w"))
 with open(cmake_path ,"r") as f:
     new = f.read()
 
-new = new.replace("switch_device", pinfo["thingName"])
+new = new.replace(device_name, pinfo["thingName"])
 with open(cmake_path, "w") as f:
     f.write(new)
 
@@ -133,4 +155,10 @@ with open(private_key_file, "w") as f:
 with open(certificate_file, "w") as f:
     f.writelines(data["certificate"])
 
-shutil.move("output/switch_device", f"output/{pinfo['thingName']}")
+for i in os.listdir("output"):
+    if i != device_name:
+        shutil.rmtree(os.path.join(""))
+
+
+shutil.move(f"output/{device_name}", f"output/{pinfo['thingName']}")
+
