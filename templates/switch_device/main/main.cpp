@@ -99,79 +99,76 @@ extern const uint8_t data_end[] asm("_binary_data_json_end");
 
 void get_env_data()
 {
-    if (data_start != NULL)
+    cJSON *json = cJSON_Parse((char *)data_start);
+    if (json == NULL)
     {
-        cJSON *json = cJSON_Parse((char *)data_start);
-        if (json == NULL)
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL)
         {
-            const char *error_ptr = cJSON_GetErrorPtr();
-            if (error_ptr != NULL)
-            {
-                ESP_LOGE(TAG, "Error: %s\n", error_ptr);
-            }
-            cJSON_Delete(json);
+            ESP_LOGE(TAG, "Error: %s\n", error_ptr);
         }
-        else
+        cJSON_Delete(json);
+    }
+    else
+    {
+        cJSON *name = cJSON_GetObjectItem(json, "name");
+        if (name->valuestring != NULL)
         {
-            cJSON *name = cJSON_GetObjectItem(json, "name");
-            if (name->valuestring != NULL)
-            {
-                thing_name = (char *)malloc(strlen(name->valuestring));
-                strcpy(thing_name, name->valuestring);
-                printf("Name: %s\n", name->valuestring);
+            thing_name = (char *)malloc(strlen(name->valuestring));
+            strcpy(thing_name, name->valuestring);
+            printf("Name: %s\n", name->valuestring);
 
-                device_config.name = name->valuestring;
-            }
-
-            cJSON *model = cJSON_GetObjectItem(json, "model");
-            if (model->valuestring != NULL)
-            {
-                printf("Model: %s\n", model->valuestring);
-            }
-
-            cJSON *switch_type = cJSON_GetObjectItem(json, "switch_type");
-            if (switch_type->valuestring != NULL)
-            {
-                switchType = switch_type->valuestring;
-                printf("Switch Type: %s\n", switch_type->valuestring);
-            }
-
-            cJSON *node_size = cJSON_GetObjectItem(json, "node_size");
-            device_config.size = node_size->valueint;
-
-            cJSON *relays = cJSON_GetObjectItem(json, "relays");
-            for (int i = 0; i < cJSON_GetArraySize(relays); i++)
-            {
-                cJSON *subitem = cJSON_GetArrayItem(relays, i);
-                gpio_num_t pin = (gpio_num_t)subitem->valueint;
-                device_config.relays.push_back(pin);
-            }
-
-            cJSON *switches = cJSON_GetObjectItem(json, "switches");
-            for (int i = 0; i < cJSON_GetArraySize(switches); i++)
-            {
-                cJSON *subitem = cJSON_GetArrayItem(switches, i);
-                gpio_num_t pin = (gpio_num_t)subitem->valueint;
-                device_config.switches.push_back(pin);
-            }
-
-            cJSON *fan_relays = cJSON_GetObjectItem(json, "fan_relays");
-            for (int i = 0; i < cJSON_GetArraySize(fan_relays); i++)
-            {
-                cJSON *subitem = cJSON_GetArrayItem(fan_relays, i);
-                gpio_num_t pin = (gpio_num_t)subitem->valueint;
-                device_config.fan_relays.push_back(pin);
-            }
-
-            cJSON *fan_switch = cJSON_GetObjectItem(json, "fan_switch");
-            gpio_num_t pin = (gpio_num_t)fan_switch->valueint;
-            device_config.fan_switch = pin;
-
-            cJSON *fan = cJSON_GetObjectItem(json, "fan");
-            device_config.fan = fan->valueint;
-
-            cJSON_Delete(json);
+            device_config.name = name->valuestring;
         }
+
+        cJSON *model = cJSON_GetObjectItem(json, "model");
+        if (model->valuestring != NULL)
+        {
+            printf("Model: %s\n", model->valuestring);
+        }
+
+        cJSON *switch_type = cJSON_GetObjectItem(json, "switch_type");
+        if (switch_type->valuestring != NULL)
+        {
+            switchType = switch_type->valuestring;
+            printf("Switch Type: %s\n", switch_type->valuestring);
+        }
+
+        cJSON *node_size = cJSON_GetObjectItem(json, "node_size");
+        device_config.size = node_size->valueint;
+
+        cJSON *relays = cJSON_GetObjectItem(json, "relays");
+        for (int i = 0; i < cJSON_GetArraySize(relays); i++)
+        {
+            cJSON *subitem = cJSON_GetArrayItem(relays, i);
+            gpio_num_t pin = (gpio_num_t)subitem->valueint;
+            device_config.relays.push_back(pin);
+        }
+
+        cJSON *switches = cJSON_GetObjectItem(json, "switches");
+        for (int i = 0; i < cJSON_GetArraySize(switches); i++)
+        {
+            cJSON *subitem = cJSON_GetArrayItem(switches, i);
+            gpio_num_t pin = (gpio_num_t)subitem->valueint;
+            device_config.switches.push_back(pin);
+        }
+
+        cJSON *fan_relays = cJSON_GetObjectItem(json, "fan_relays");
+        for (int i = 0; i < cJSON_GetArraySize(fan_relays); i++)
+        {
+            cJSON *subitem = cJSON_GetArrayItem(fan_relays, i);
+            gpio_num_t pin = (gpio_num_t)subitem->valueint;
+            device_config.fan_relays.push_back(pin);
+        }
+
+        cJSON *fan_switch = cJSON_GetObjectItem(json, "fan_switch");
+        gpio_num_t pin = (gpio_num_t)fan_switch->valueint;
+        device_config.fan_switch = pin;
+
+        cJSON *fan = cJSON_GetObjectItem(json, "fan");
+        device_config.fan = fan->valueint;
+
+        cJSON_Delete(json);
     }
 }
 

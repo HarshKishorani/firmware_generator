@@ -71,7 +71,7 @@ base_path = "http://127.0.0.1:8000/"
 get_product_via_token_endpoint = "products/get_product_from_token/"
 register_device_api = "v1/api/device_control/device/register"
 
-token = "1da61c35-1d7b-4fbf-b18f-02e655dc77c3"
+token = "4655c930-3635-4313-b759-42d697455543"
 
 save_name = "generated_firmware.zip"
 
