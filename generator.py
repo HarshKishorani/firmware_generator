@@ -7,6 +7,8 @@ import datetime
 import boto3
 import shutil
 
+shutil.rmtree("output", ignore_errors=True)
+shutil.copytree(f"templates", "output")
 
 class bcolors:
     HEADER = '\033[95m'
@@ -31,8 +33,8 @@ def create_thing(thing_name, attr, product_name, product_id):
         "attributes" : {}
     }
     
-    for i in attr:
-        attr_payload["attributes"][i] = "none"
+    # for i in attr:
+    #     attr_payload["attributes"][i] = "none"
     try:    
         res = client = boto3.client("iot", region_name = "eu-west-1")
 
@@ -94,26 +96,25 @@ base_path = "http://127.0.0.1:8000/"
 get_product_via_token_endpoint = "products/get_product_from_token/"
 register_device_api = "v1/api/device_control/device/register"
 
-token = "34eb7173-7250-4eb1-b987-ac72e44b3ef9"
+token = "7494169b-5f4c-4aa4-94c3-0aafc4ada207"
 
 save_name = "generated_firmware.zip"
 
 file_id = "1ur_5OzvQX0zXAbD555VJaMdOzrSr8JXn"
 
+# def download_templates_file(save_name):
+#     assert save_name.endswith("zip")
+#     gdown.download(f'https://drive.google.com/uc?id={file_id}&export=download', save_name, quiet=False)
+#     with ZipFile(save_name, "r") as zip:
+#         zip.extractall(f"{save_name[:-4]}")
+#     shutil.rmtree("output", ignore_errors=True)
+#     os.makedirs("output", exist_ok=True)
 
+#     shutil.copytree(r"generated_firmware\firmware_generator-main\templates", "output\\", dirs_exist_ok=True) 
+#     shutil.rmtree(r"generated_firmware")
 
-def download_templates_file(save_name):
-    assert save_name.endswith("zip")
-    gdown.download(f'https://drive.google.com/uc?id={file_id}&export=download', save_name, quiet=False)
-    with ZipFile(save_name, "r") as zip:
-        zip.extractall(f"{save_name[:-4]}")
-    shutil.rmtree("output", ignore_errors=True)
-    os.makedirs("output", exist_ok=True)
+# download_templates_file(save_name)
 
-    shutil.copytree(r"generated_firmware\firmware_generator-main\templates", "output\\", dirs_exist_ok=True) 
-    shutil.rmtree(r"generated_firmware")
-
-download_templates_file(save_name)
 res = requests.get(base_path + get_product_via_token_endpoint, headers={"token" : token})
 print(res.status_code)
 if res.status_code == 400:
@@ -132,8 +133,8 @@ private_key_file = os.path.join(certs_path, "private.pem.key")
 
 pinfo["thingName"] = str(pinfo["id"]) + f"_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
 attrs = []
-for i in pinfo["attributes"]:
-    attrs.append(i["attribute_name"])
+# for i in pinfo["attributes"]:
+#     attrs.append(i["attribute_name"])
 # print(pinfo)
 data = create_thing(pinfo["thingName"], attrs, device_name, pinfo["id"])
 print("Device id : "+bcolors.OKGREEN + pinfo["thingName"] + bcolors.ENDC)
@@ -157,7 +158,7 @@ with open(certificate_file, "w") as f:
 
 for i in os.listdir("output"):
     if i != device_name:
-        shutil.rmtree(os.path.join(""))
+        shutil.rmtree(os.path.join("output", i))
 
 
 shutil.move(f"output/{device_name}", f"output/{pinfo['thingName']}")
