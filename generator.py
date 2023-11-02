@@ -69,7 +69,7 @@ def create_thing(thing_name, attr, product_name, product_id):
             ]
             }
         )
-        res = requests.post(base_path + register_device_api, data={"id" : thing_name, "name" : "none", "product" : product_id})
+        res = requests.post(base_path + register_device_api, data={"device_id" : thing_name, "device_name" : "none", "product" : product_id})
         if res.status_code == 200:
             print("Device Registered in DB")
         else:
@@ -96,7 +96,7 @@ base_path = "http://127.0.0.1:8000/"
 get_product_via_token_endpoint = "products/get_product_from_token/"
 register_device_api = "v1/api/device_control/device/register"
 
-token = "7494169b-5f4c-4aa4-94c3-0aafc4ada207"
+token = "9b62f099-7ac7-4bcd-8e10-08c030934ef6"
 
 save_name = "generated_firmware.zip"
 
@@ -123,7 +123,7 @@ if res.status_code == 400:
     exit()
 pinfo = res.json()
 
-device_name = pinfo["base_product_name"]
+device_name = pinfo["solution_name"]
 data_json_path = os.path.join("output", device_name,"main", "data.json")
 cmake_path = os.path.join("output", device_name, "CMakeLists.txt") 
 certs_path = os.path.join("output", device_name,"main", "certs")
@@ -131,14 +131,15 @@ os.makedirs(certs_path, exist_ok=True)
 certificate_file = os.path.join(certs_path, "certificate.pem.crt")
 private_key_file = os.path.join(certs_path, "private.pem.key")
 
-pinfo["thingName"] = str(pinfo["id"]) + f"_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+pinfo["thingName"] = str(pinfo["pid"]) + f"_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
 attrs = []
 # for i in pinfo["attributes"]:
 #     attrs.append(i["attribute_name"])
 # print(pinfo)
-data = create_thing(pinfo["thingName"], attrs, device_name, pinfo["id"])
+data = create_thing(pinfo["thingName"], attrs, device_name, pinfo["pid"])
 print("Device id : "+bcolors.OKGREEN + pinfo["thingName"] + bcolors.ENDC)
-json_data = json.load(open(data_json_path, "r"))
+# json_data = json.load(open(data_json_path, "r"))
+json_data =pinfo["attributes"]
 json_data["name"] = pinfo["thingName"]
 json.dump(json_data,open(data_json_path,"w"))
 
