@@ -5,6 +5,7 @@ import os
 import requests
 import datetime
 import boto3
+import hashlib
 import shutil
 
 shutil.rmtree("output", ignore_errors=True)
@@ -96,7 +97,7 @@ base_path = "http://127.0.0.1:8000/"
 get_product_via_token_endpoint = "products/get_product_from_token/"
 register_device_api = "v1/api/device_control/device/register"
 
-token = "9b62f099-7ac7-4bcd-8e10-08c030934ef6"
+token = "984b8022-b523-4fae-8d0b-5a1e9c2598a7"
 
 save_name = "generated_firmware.zip"
 
@@ -131,7 +132,7 @@ os.makedirs(certs_path, exist_ok=True)
 certificate_file = os.path.join(certs_path, "certificate.pem.crt")
 private_key_file = os.path.join(certs_path, "private.pem.key")
 
-pinfo["thingName"] = str(pinfo["pid"]) + f"_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+pinfo["thingName"] = str(pinfo["pid"]) + f"_{hashlib.shake_256(datetime.datetime.now().strftime('%Y%m%d%H%M%S').encode()).hexdigest(4)}"
 attrs = []
 # for i in pinfo["attributes"]:
 #     attrs.append(i["attribute_name"])
