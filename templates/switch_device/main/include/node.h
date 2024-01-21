@@ -19,8 +19,12 @@ typedef struct switch_device_config
     vector<gpio_num_t> switches;
     vector<gpio_num_t> fan_relays;
     gpio_num_t fan_switch;
+    char *SUBSCRIBE_TOPIC;
+    char *PUBLISH_TOPIC;
 
 } switch_device_config;
+
+switch_device_config device_config;
 
 class Node
 {
@@ -76,7 +80,7 @@ public:
             }
             fanSwitchState = state;
             fanCloudState = !state;
-            aws_publish_bool(client, "fan_switch", !state);
+            aws_publish_bool(client, device_config.PUBLISH_TOPIC, "fan_switch", !state);
         }
         else
         {
@@ -185,7 +189,7 @@ public:
             set_switch_function(config.relays[switchNumber - 1], SwitchState[switchNumber - 1]);
             char *switch_name = (char *)malloc(100);
             sprintf(switch_name, "switch_%d", switchNumber);
-            aws_publish_bool(client, switch_name, SwitchState[switchNumber - 1]);
+            aws_publish_bool(client, device_config.PUBLISH_TOPIC, switch_name, SwitchState[switchNumber - 1]);
             free(switch_name);
         }
         else
@@ -195,7 +199,7 @@ public:
             set_switch_function(config.relays[switchNumber - 1], SwitchState[switchNumber - 1]);
             char *switch_name = (char *)malloc(100);
             sprintf(switch_name, "switch_%d", switchNumber);
-            aws_publish_bool(client, switch_name, SwitchState[switchNumber - 1]);
+            aws_publish_bool(client, device_config.PUBLISH_TOPIC, switch_name, SwitchState[switchNumber - 1]);
             free(switch_name);
         }
     }

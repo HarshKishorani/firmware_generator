@@ -11,11 +11,11 @@ using namespace std;
 const char *PUBLISH_TAG = "PUBLISH";
 
 // TODO : Write function to get Subscribe and Publish Topics from thing name
-const char *SUBSCRIBE_TOPIC = "MyESP32/sub";
-const char *PUBLISH_TOPIC = "MyESP32/pub";
+// const char SUBSCRIBE_TOPIC = "MyESP32/sub";
+// const char *PUBLISH_TOPIC = "MyESP32/pub";
 
 //* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Publish Bool ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void aws_publish_bool(AWS_IoT_Client *pClient, const char *key, bool value)
+void aws_publish_bool(AWS_IoT_Client *pClient, const char *PUBLISH_TOPIC, const char *key, bool value)
 {
     IoT_Publish_Message_Params params;
     char cPayload[100];
@@ -38,7 +38,7 @@ void aws_publish_bool(AWS_IoT_Client *pClient, const char *key, bool value)
     }
 }
 
-void aws_publish_int(AWS_IoT_Client *pClient, const char *key, int value)
+void aws_publish_int(AWS_IoT_Client *pClient, const char *PUBLISH_TOPIC, const char *key, int value)
 {
     IoT_Publish_Message_Params params;
     char cPayload[100];
@@ -61,7 +61,7 @@ void aws_publish_int(AWS_IoT_Client *pClient, const char *key, int value)
     }
 }
 
-void aws_publish_string(AWS_IoT_Client *pClient, const char *key, const char* value)
+void aws_publish_string(AWS_IoT_Client *pClient, const char *PUBLISH_TOPIC, const char *key, const char *value)
 {
     IoT_Publish_Message_Params params;
     char cPayload[100];

@@ -9,7 +9,7 @@
 #include <esp_wifi.h>
 #include <esp_event.h>
 #include <nvs_flash.h>
-
+#include "include/node.h"
 #include <esp_idf_version.h>
 
 #include <wifi_provisioning/manager.h>
@@ -192,7 +192,7 @@ esp_err_t custom_prov_data_handler(uint32_t session_id, const uint8_t *inbuf, ss
     {
         ESP_LOGI(PROV_TAG, "Received data: %.*s", inlen, (char *)inbuf);
     }
-    char response[] = "SUCCESS";
+    const char *response = device_config.name.c_str(); // Forware device Id to mobile
     *outbuf = (uint8_t *)strdup(response);
     if (*outbuf == NULL)
     {
