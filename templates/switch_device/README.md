@@ -65,7 +65,7 @@ To generate firmware for your product perform the following steps :
 ## Pending tasks
  
 - [x] Boot Interrupt
-- [ ] Function to get Subscribe and Publish topics.
+- [x] Function to get Subscribe and Publish topics.
 - [x] Cloud to Device Updates (Subscribe to updates from cloud).
 - [x] Device to Cloud Updates (Publish updates from cloud).
 - [x] Factory Reset, Wifi Reset and Reboot Device functions.
