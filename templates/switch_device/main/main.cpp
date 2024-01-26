@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "include/app_wifi.h"
 #include "cJSON.h"
-#include "include/node.h"
 #include "esp_timer.h"
 #include "include/utils.h"
 using namespace std;
@@ -19,8 +18,6 @@ uint32_t port = AWS_IOT_MQTT_PORT;
 
 char *thing_name;
 string switchType;
-
-switch_device_config device_config;
 Node nodes;
 
 //* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Boot Pin Interrupt task ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -119,6 +116,15 @@ void get_env_data()
             printf("Name: %s\n", name->valuestring);
 
             device_config.name = name->valuestring;
+            char *extension = (char*)"/sub";
+            device_config.SUBSCRIBE_TOPIC = (char *)malloc(strlen(name->valuestring) + 1 + 4);
+            strcpy(device_config.SUBSCRIBE_TOPIC, name->valuestring); 
+            strcat(device_config.SUBSCRIBE_TOPIC, extension); 
+
+            extension = (char*)"/pub";
+            device_config.PUBLISH_TOPIC = (char *)malloc(strlen(name->valuestring) + 1 + 4);
+            strcpy(device_config.PUBLISH_TOPIC, name->valuestring); 
+            strcat(device_config.PUBLISH_TOPIC, extension); 
         }
 
         cJSON *model = cJSON_GetObjectItem(json, "model");
@@ -217,62 +223,55 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
     {
         ESP_LOGI(AWS_TAG, "Received new switch_1 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(1), param->valueint);
-        aws_publish_bool(&client, param->string, param->valueint);
+        aws_publish_bool(&client, device_config.PUBLISH_TOPIC, param->string, param->valueint);
     }
     else if (strcmp(param->string, "switch_2") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new switch_2 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(2), param->valueint);
-        aws_publish_bool(&client, param->string, param->valueint);
+        aws_publish_bool(&client, device_config.PUBLISH_TOPIC, param->string, param->valueint);
     }
     else if (strcmp(param->string, "switch_3") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new switch_3 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(3), param->valueint);
-        aws_publish_bool(&client, param->string, param->valueint);
+        aws_publish_bool(&client, device_config.PUBLISH_TOPIC, param->string, param->valueint);
     }
     else if (strcmp(param->string, "switch_4") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new switch_4 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(4), param->valueint);
-        aws_publish_bool(&client, param->string, param->valueint);
+        aws_publish_bool(&client, device_config.PUBLISH_TOPIC, param->string, param->valueint);
     }
     else if (strcmp(param->string, "switch_5") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new switch_5 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(5), param->valueint);
-        aws_publish_bool(&client, param->string, param->valueint);
+        aws_publish_bool(&client, device_config.PUBLISH_TOPIC, param->string, param->valueint);
     }
     else if (strcmp(param->string, "switch_6") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new switch_6 Value : %d", param->valueint);
         nodes.set_switch_function(nodes.getRelayGPIO(6), param->valueint);
-        aws_publish_bool(&client, param->string, param->valueint);
+        aws_publish_bool(&client, device_config.PUBLISH_TOPIC, param->string, param->valueint);
     }
     else if (strcmp(param->string, "fan_speed") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new Fan Speed Value : %d", param->valueint);
         nodes.fan_speed = param->valueint;
         nodes.set_fan(nodes.fanCloudState);
-        aws_publish_int(&client, param->string, param->valueint);
+        aws_publish_int(&client, device_config.PUBLISH_TOPIC, param->string, param->valueint);
     }
     else if (strcmp(param->string, "fan_switch") == 0)
     {
         ESP_LOGI(AWS_TAG, "Received new Fan State Value : %d", param->valueint);
         nodes.fanCloudState = param->valueint;
         nodes.set_fan(nodes.fanCloudState);
-        aws_publish_bool(&client, param->string, param->valueint);
+        aws_publish_bool(&client, device_config.PUBLISH_TOPIC, param->string, param->valueint);
     }
-    // else if (strcmp(param->string, "All") == 0)
-    // {
-    //     ESP_LOGI(TAG, "Received value = %s for %s - %s",
-    //              val.val.b ? "true" : "false", app_device_get_name(device),
-    //              param->string);
-    //     aws_publish_bool(&client, param->string, param->valueint);
-    // }
     else if (strcmp(param->string, "reboot") == 0)
     {
-        aws_publish_bool(&client, param->string, param->valueint);
+        aws_publish_bool(&client, device_config.PUBLISH_TOPIC, param->string, param->valueint);
         if (param->valueint == 1)
         {
             ESP_LOGI(AWS_TAG, "Received Reboot Request.");
@@ -281,7 +280,7 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
     }
     else if (strcmp(param->string, "wifi_reset") == 0)
     {
-        aws_publish_bool(&client, param->string, param->valueint);
+        aws_publish_bool(&client, device_config.PUBLISH_TOPIC, param->string, param->valueint);
         if (param->valueint == 1)
         {
             ESP_LOGI(AWS_TAG, "Received Wifi-Reset Request.");
@@ -290,7 +289,7 @@ void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, ui
     }
     else if (strcmp(param->string, "factory_reset") == 0)
     {
-        aws_publish_bool(&client, param->string, param->valueint);
+        aws_publish_bool(&client, device_config.PUBLISH_TOPIC, param->string, param->valueint);
         if (param->valueint == 1)
         {
             ESP_LOGI(AWS_TAG, "Received Factory-Reset Request.");
@@ -367,9 +366,9 @@ void aws_iot_task(void *param)
     }
 
     //* Subscribe to topic to receive updates from cloud
-    ESP_LOGI(AWS_TAG, "Subscribing to %s to receive updates.....", SUBSCRIBE_TOPIC);
+    ESP_LOGI(AWS_TAG, "Subscribing to %s to receive updates.....", device_config.SUBSCRIBE_TOPIC);
 
-    rc = aws_iot_mqtt_subscribe(&client, SUBSCRIBE_TOPIC, strlen(SUBSCRIBE_TOPIC), QOS0, iot_subscribe_callback_handler, NULL);
+    rc = aws_iot_mqtt_subscribe(&client, device_config.SUBSCRIBE_TOPIC, strlen(device_config.SUBSCRIBE_TOPIC), QOS0, iot_subscribe_callback_handler, NULL);
     if (SUCCESS != rc)
     {
         ESP_LOGE(AWS_TAG, "Error subscribing : %d ", rc);
