@@ -97,7 +97,7 @@ base_path = "http://127.0.0.1:8000/"
 get_product_via_token_endpoint = "products/get_product_from_token/"
 register_device_api = "v1/api/device_control/device/register"
 
-token = "984b8022-b523-4fae-8d0b-5a1e9c2598a7"
+token = "10e3df26-6e55-460e-9ad6-cc346cf6eb02"
 
 save_name = "generated_firmware.zip"
 
@@ -124,7 +124,7 @@ if res.status_code == 400:
     exit()
 pinfo = res.json()
 
-device_name = pinfo["solution_name"]
+device_name = pinfo["firmware_template"]
 data_json_path = os.path.join("output", device_name,"main", "data.json")
 cmake_path = os.path.join("output", device_name, "CMakeLists.txt") 
 certs_path = os.path.join("output", device_name,"main", "certs")
@@ -132,7 +132,7 @@ os.makedirs(certs_path, exist_ok=True)
 certificate_file = os.path.join(certs_path, "certificate.pem.crt")
 private_key_file = os.path.join(certs_path, "private.pem.key")
 
-pinfo["thingName"] = str(pinfo["pid"]) + f"_{hashlib.shake_256(datetime.datetime.now().strftime('%Y%m%d%H%M%S').encode()).hexdigest(4)}"
+pinfo["thingName"] = f"{hashlib.shake_256(datetime.datetime.now().strftime('%Y%m%d%H%M%S').encode()).hexdigest(5)}"
 attrs = []
 # for i in pinfo["attributes"]:
 #     attrs.append(i["attribute_name"])
