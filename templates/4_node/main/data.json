@@ -1,0 +1,25 @@
+{
+    "name": "MyESP32",
+    "model": "esp32",
+    "switch_type": "RETRO",
+    "node_size": 4,
+    "fan": false,
+    "relays": [
+        16,
+        17,
+        18,
+        19
+    ],
+    "switches": [
+        13,
+        27,
+        26,
+        25
+    ],
+    "fan_relays": [
+        21,
+        22,
+        23
+    ],
+    "fan_switch": 33
+}

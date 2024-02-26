@@ -98,7 +98,7 @@ get_product_via_token_endpoint = "products/get_product_from_token/"
 register_device_api = "v1/api/device_control/device/register"
 
 
-token = "973f9713-4a43-4f0d-bae5-4891b08f52a9"
+token = "872d76f6-fc24-4a53-aace-c6e15685ef40"
 
 save_name = "generated_firmware.zip"
 
@@ -125,10 +125,10 @@ if res.status_code == 400:
     exit()
 pinfo = res.json()
 
-device_name = pinfo["firmware_template"]
+device_name = pinfo["solution_name"]
 data_json_path = os.path.join("output", device_name,"main", "data.json")
 cmake_path = os.path.join("output", device_name, "CMakeLists.txt") 
-certs_path = os.path.join("output", device_name,"main", "certs")
+certs_path = os.path.join("output", device_name, "main", "certs")
 os.makedirs(certs_path, exist_ok=True)
 certificate_file = os.path.join(certs_path, "certificate.pem.crt")
 private_key_file = os.path.join(certs_path, "private.pem.key")

@@ -5,6 +5,10 @@
 #include "include/utils.h"
 using namespace std;
 
+/* Function responsible for configuring and starting the esp_local_ctrl service.
+ * See local_ctrl_service.c for implementation */
+extern void start_esp_local_ctrl_service(void);
+
 //* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Global Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #define BOOT_PIN GPIO_NUM_0
@@ -116,15 +120,15 @@ void get_env_data()
             printf("Name: %s\n", name->valuestring);
 
             device_config.name = name->valuestring;
-            char *extension = (char*)"/sub";
+            char *extension = (char *)"/sub";
             device_config.SUBSCRIBE_TOPIC = (char *)malloc(strlen(name->valuestring) + 1 + 4);
-            strcpy(device_config.SUBSCRIBE_TOPIC, name->valuestring); 
-            strcat(device_config.SUBSCRIBE_TOPIC, extension); 
+            strcpy(device_config.SUBSCRIBE_TOPIC, name->valuestring);
+            strcat(device_config.SUBSCRIBE_TOPIC, extension);
 
-            extension = (char*)"/pub";
+            extension = (char *)"/pub";
             device_config.PUBLISH_TOPIC = (char *)malloc(strlen(name->valuestring) + 1 + 4);
-            strcpy(device_config.PUBLISH_TOPIC, name->valuestring); 
-            strcat(device_config.PUBLISH_TOPIC, extension); 
+            strcpy(device_config.PUBLISH_TOPIC, name->valuestring);
+            strcat(device_config.PUBLISH_TOPIC, extension);
         }
 
         cJSON *model = cJSON_GetObjectItem(json, "model");
@@ -469,5 +473,6 @@ extern "C" void app_main(void)
 
     // Initialize wifi and start aws_iot_task
     initialise_wifi();
+    start_esp_local_ctrl_service();
     xTaskCreatePinnedToCore(&aws_iot_task, "aws_iot_task", 9216, NULL, 5, NULL, 1);
 }
